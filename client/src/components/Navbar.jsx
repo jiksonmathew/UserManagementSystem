@@ -11,8 +11,10 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
+      // Perform logout API request
       await api.post("/auth/logout", {}, { withCredentials: true });
 
+      // Show success toast
       toast.update(toastId, {
         render: "Logged out successfully!",
         type: "success",
@@ -20,8 +22,11 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
         autoClose: 2000,
       });
 
+      // Clear authentication state
       setIsAuthenticated(false);
       setUserRole("");
+      
+      // Redirect to login page
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
@@ -34,12 +39,16 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
     }
   };
 
+  const handleLoginRedirect = () => {
+    navigate("/login");
+  };
+
   return (
     <>
       <nav className="navbar navbar-dark bg-dark px-3">
         <Link to="/" className="navbar-brand">User Management</Link>
         <div>
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <>
               <Link className="btn btn-link text-white" to="/dashboard">Dashboard</Link>
               {userRole === "admin" && (
@@ -47,9 +56,8 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
               )}
               <button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button>
             </>
-          )}
-          {!isAuthenticated && (
-            <Link className="btn btn-success" to="/login">Login</Link>
+          ) : (
+            <button className="btn btn-success" onClick={handleLoginRedirect}>Login</button>
           )}
         </div>
       </nav>
