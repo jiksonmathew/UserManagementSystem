@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://usermanagementsystem-client.onrender.com", // or '*' for dev
+    origin: ["https://usermanagementsystem-client.onrender.com" ,"http://localhost:5173"] // or '*' for dev
     credentials: true,
   })
 );
