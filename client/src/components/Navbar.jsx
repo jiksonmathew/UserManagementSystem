@@ -67,43 +67,59 @@ function Navbar() {
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
-        <div className="container-fluid">
-          <Link to="/" className="navbar-brand">
-            User Management
-          </Link>
-          <div className="collapse navbar-collapse">
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              {isAuthenticated && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">
-                    Dashboard
-                  </Link>
-                </li>
-              )}
+  <div className="container-fluid">
+    <Link to="/" className="navbar-brand">
+      User Management
+    </Link>
 
-              {isAuthenticated && userRole === "admin" && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/admin">
-                    Admin Panel
-                  </Link>
-                </li>
-              )}
+    {/* Navbar toggler for mobile */}
+    <button
+      className="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span className="navbar-toggler-icon"></span>
+    </button>
 
-              <li className="nav-item">
-                {isAuthenticated ? (
-                  <button className="btn btn-danger ms-3" onClick={handleLogout}>
-                    Logout
-                  </button>
-                ) : (
-                  <Link className="btn btn-success ms-3" to="/login">
-                    Login
-                  </Link>
-                )}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+    {/* Collapsible part */}
+    <div className="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+        {isAuthenticated && (
+          <li className="nav-item">
+            <Link className="nav-link" to="/dashboard">
+              Dashboard
+            </Link>
+          </li>
+        )}
+
+        {isAuthenticated && userRole === "admin" && (
+          <li className="nav-item">
+            <Link className="nav-link" to="/admin">
+              Admin Panel
+            </Link>
+          </li>
+        )}
+
+        <li className="nav-item">
+          {isAuthenticated ? (
+            <button className="btn btn-danger ms-3" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <Link className="btn btn-success ms-3" to="/login">
+              Login
+            </Link>
+          )}
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 
       <ToastContainer />
     </>
