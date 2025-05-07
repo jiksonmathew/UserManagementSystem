@@ -29,33 +29,40 @@ function Navbar() {
     checkAuth();
   }, [location.pathname, skipAuthCheck]);
 
-  const handleLogout = async () => {
-    const toastId = toast.loading("Logging out...");
-    try {
-      await api.post("/auth/logout", {}, { withCredentials: true });
+ const handleLogout = async () => {
+  const toastId = toast.loading("Logging out...");
 
-      toast.update(toastId, {
-        render: "Logged out successfully!",
-        type: "success",
-        isLoading: false,
-        autoClose: 2000,
-      });
+  try {
+    // Send logout request to backend
+    await api.post("/auth/logout", {}, { withCredentials: true });
 
-      // Prevent re-checking immediately after logout
-      setSkipAuthCheck(true);
-      setIsAuthenticated(false);
-      setUserRole("");
+    // Update state
+    setIsAuthenticated(false);
+    setUserRole("");
+    setSkipAuthCheck(true);
 
+    // Show success toast
+    toast.update(toastId, {
+      render: "Logged out successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 2000,
+    });
+
+    // Slight delay to allow toast update before navigation
+    setTimeout(() => {
       navigate("/login");
-    } catch (err) {
-      toast.update(toastId, {
-        render: "Logout failed!",
-        type: "error",
-        isLoading: false,
-        autoClose: 3000,
-      });
-    }
-  };
+    }, 100);
+  } catch (err) {
+    // Show error toast if logout fails
+    toast.update(toastId, {
+      render: "Logout failed!",
+      type: "error",
+      isLoading: false,
+      autoClose: 3000,
+    });
+  }
+};
 
   return (
     <>
