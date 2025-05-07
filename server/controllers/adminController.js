@@ -12,15 +12,29 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
-  const updateData = { name, email, role };
-  if (password) {
-    updateData.password = await bcrypt.hash(password, 10);
+  try {
+    const { name, email, password, role } = req.body;
+    const userId = req.params.id;
+
+    // Check if the new email is already used by another user
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      return res.status(400).json({ message: "Email is already in use." });
+    }
+
+    const updateData = { name, email, role };
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    }).select("-password");
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
-  const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-    new: true,
-  }).select("-password");
-  res.json(user);
 };
 
 exports.createAdmin = async (req, res) => {
