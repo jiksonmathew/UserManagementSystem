@@ -6,6 +6,8 @@ import api from "../api";
 function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) {
   const navigate = useNavigate();
 
+  console.log("Navbar props:", { isAuthenticated, userRole });
+
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
@@ -45,15 +47,3 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
               )}
               <button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button>
             </>
-          )}
-          {!isAuthenticated && (
-            <Link className="btn btn-success" to="/login">Login</Link>
-          )}
-        </div>
-      </nav>
-      <ToastContainer />
-    </>
-  );
-}
-
-export default Navbar;
