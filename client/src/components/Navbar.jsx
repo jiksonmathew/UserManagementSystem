@@ -1,20 +1,36 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../api";
 
-function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) {
+function Navbar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
-  console.log("Navbar props:", { isAuthenticated, userRole });
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await api.get("/auth/me", { withCredentials: true });
+        setIsAuthenticated(true);
+        setUserRole(res.data.user.role);
+      } catch {
+        setIsAuthenticated(false);
+        setUserRole("");
+      }
+    };
+
+    checkAuth();
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
-      // Perform logout API request
-      await api.post("/auth/logout", {}, { withCredentials: true });
+      const res = await api.post("/auth/logout", {}, { withCredentials: true });
+      console.log("Logout response:", res.data);
 
-      // Show success toast
       toast.update(toastId, {
         render: "Logged out successfully!",
         type: "success",
@@ -22,12 +38,10 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
         autoClose: 2000,
       });
 
-      // Clear authentication state
       setIsAuthenticated(false);
       setUserRole("");
-      
-      // Redirect to login page
-      navigate("/login");
+
+      setTimeout(() => navigate("/login"), 500);
     } catch (err) {
       console.error("Logout error:", err);
       toast.update(toastId, {
@@ -39,28 +53,49 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
     }
   };
 
-  const handleLoginRedirect = () => {
-    navigate("/login");
-  };
-
   return (
     <>
-      <nav className="navbar navbar-dark bg-dark px-3">
-        <Link to="/" className="navbar-brand">User Management</Link>
-        <div>
-          {isAuthenticated ? (
-            <>
-              <Link className="btn btn-link text-white" to="/dashboard">Dashboard</Link>
-              {userRole === "admin" && (
-                <Link className="btn btn-link text-white" to="/admin">Admin Panel</Link>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+        <div className="container-fluid">
+          <Link to="/" className="navbar-brand">
+            User Management
+          </Link>
+          <div className="collapse navbar-collapse">
+            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+              {isAuthenticated && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/dashboard">
+                    Dashboard
+                  </Link>
+                </li>
               )}
-              <button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <button className="btn btn-success" onClick={handleLoginRedirect}>Login</button>
-          )}
+
+              {isAuthenticated && userRole === "admin" && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/admin">
+                    Admin Panel
+                  </Link>
+                </li>
+              )}
+
+              <li className="nav-item">
+                {isAuthenticated ? (
+                  <button
+                    className="btn btn-danger ms-3"
+                    onClick={handleLogout}>
+                    Logout
+                  </button>
+                ) : (
+                  <Link className="btn btn-success ms-3" to="/login">
+                    Login
+                  </Link>
+                )}
+              </li>
+            </ul>
+          </div>
         </div>
       </nav>
+
       <ToastContainer />
     </>
   );
