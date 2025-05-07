@@ -1,35 +1,15 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../api";
 
-function Navbar() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState("");
+function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await api.get("/auth/me", { withCredentials: true });
-        setIsAuthenticated(true);
-        setUserRole(res.data.user.role);
-      } catch {
-        setIsAuthenticated(false);
-        setUserRole("");
-      }
-    };
-
-    checkAuth();
-  }, [location.pathname]);
 
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
-      const res = await api.post("/auth/logout", {}, { withCredentials: true });
-      console.log("Logout response:", res.data);
+      await api.post("/auth/logout", {}, { withCredentials: true });
 
       toast.update(toastId, {
         render: "Logged out successfully!",
@@ -40,8 +20,7 @@ function Navbar() {
 
       setIsAuthenticated(false);
       setUserRole("");
-
-      setTimeout(() => navigate("/login"), 500);
+      navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
       toast.update(toastId, {
@@ -55,47 +34,23 @@ function Navbar() {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
-        <div className="container-fluid">
-          <Link to="/" className="navbar-brand">
-            User Management
-          </Link>
-          <div className="collapse navbar-collapse">
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              {isAuthenticated && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">
-                    Dashboard
-                  </Link>
-                </li>
+      <nav className="navbar navbar-dark bg-dark px-3">
+        <Link to="/" className="navbar-brand">User Management</Link>
+        <div>
+          {isAuthenticated && (
+            <>
+              <Link className="btn btn-link text-white" to="/dashboard">Dashboard</Link>
+              {userRole === "admin" && (
+                <Link className="btn btn-link text-white" to="/admin">Admin Panel</Link>
               )}
-
-              {isAuthenticated && userRole === "admin" && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/admin">
-                    Admin Panel
-                  </Link>
-                </li>
-              )}
-
-              <li className="nav-item">
-                {isAuthenticated ? (
-                  <button
-                    className="btn btn-danger ms-3"
-                    onClick={handleLogout}>
-                    Logout
-                  </button>
-                ) : (
-                  <Link className="btn btn-success ms-3" to="/login">
-                    Login
-                  </Link>
-                )}
-              </li>
-            </ul>
-          </div>
+              <button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button>
+            </>
+          )}
+          {!isAuthenticated && (
+            <Link className="btn btn-success" to="/login">Login</Link>
+          )}
         </div>
       </nav>
-
       <ToastContainer />
     </>
   );
