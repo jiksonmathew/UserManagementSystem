@@ -47,3 +47,15 @@ function Navbar({ isAuthenticated, setIsAuthenticated, setUserRole, userRole }) 
               )}
               <button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button>
             </>
+          )}
+          {!isAuthenticated && (
+            <Link className="btn btn-success" to="/login">Login</Link>
+          )}
+        </div>
+      </nav>
+      <ToastContainer />
+    </>
+  );
+}
+
+export default Navbar;
