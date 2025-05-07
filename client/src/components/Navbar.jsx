@@ -7,10 +7,14 @@ import api from "../api";
 function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState("");
+  const [skipAuthCheck, setSkipAuthCheck] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    if (skipAuthCheck) return;
+
     const checkAuth = async () => {
       try {
         const res = await api.get("/auth/me", { withCredentials: true });
@@ -23,13 +27,12 @@ function Navbar() {
     };
 
     checkAuth();
-  }, [location.pathname]);
+  }, [location.pathname, skipAuthCheck]);
 
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
-      const res = await api.post("/auth/logout", {}, { withCredentials: true });
-      console.log("Logout response:", res.data);
+      await api.post("/auth/logout", {}, { withCredentials: true });
 
       toast.update(toastId, {
         render: "Logged out successfully!",
@@ -38,12 +41,13 @@ function Navbar() {
         autoClose: 2000,
       });
 
+      // Prevent re-checking immediately after logout
+      setSkipAuthCheck(true);
       setIsAuthenticated(false);
       setUserRole("");
 
-      setTimeout(() => navigate("/login"), 500);
+      navigate("/login");
     } catch (err) {
-      console.error("Logout error:", err);
       toast.update(toastId, {
         render: "Logout failed!",
         type: "error",
@@ -80,9 +84,7 @@ function Navbar() {
 
               <li className="nav-item">
                 {isAuthenticated ? (
-                  <button
-                    className="btn btn-danger ms-3"
-                    onClick={handleLogout}>
+                  <button className="btn btn-danger ms-3" onClick={handleLogout}>
                     Logout
                   </button>
                 ) : (
